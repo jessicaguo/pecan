@@ -7,8 +7,17 @@ For more information about this file see also [Keep a Changelog](http://keepacha
 
 ## [Unreleased]
 
+### Due to dependencies, PEcAn is now using R 4.0.2 for Docker images.
+
+This is a major change:
+
+- Newer version of R 
+- Ubuntu 20.04 instead of Debian.
+
 ### Fixed
 
+- Removed sender.py and now allow the submission of workflows from inside the rstudio container.
+- Use TRAEFIK_FRONTEND_RULE in compose file and TRAEFIK_HOST in env.example, using TRAEFIK_HOST everywhere now. Make sure TRAEFIK_HOST is used in .env
 - Use initial biomass pools for Sorghum and Setaria #2495, #2496
 - PEcAn.DB::betyConnect() is now smarter, and will try to use either config.php or environment variables to create a connection. It has switched to use db.open helper function (#2632).
 - PEcAn.utils::tranformstats() assumed the statistic names column of its input was a factor. It now accepts character too, and returns the same class given as input (#2545).
@@ -25,11 +34,13 @@ For more information about this file see also [Keep a Changelog](http://keepacha
 - Update ED docker build, will now build version 2.2.0 and git
 - Do not override meta-analysis settings random-effects = FALSE https://github.com/PecanProject/pecan/pull/2625
 - model2netcdf.ED2 no longer detecting which varibles names `-T-` files have based on ED2 version (#2623)
--gSSURGO file download now added as inputs into BETY through extract_soil_gssurgo (#2666)
- 
+- Changed docker-compose.yml to use user & group IDs of the operating system user (#2572)  
+- gSSURGO file download now added as inputs into BETY through extract_soil_gssurgo (#2666)
+- ensure Tleaf converted to K for temperature corrections in PEcAn.photosynthesis::fitA (#2726)
 
 ### Changed
 
+- Now using R 4.0.2 for Docker images. This is a major change. Newer version of R and using Ubuntu 20.04 instead of Debian.
 - Replaced `tmvtnorm` package with `TruncatedNormal` package for speed up per #2621.
 - Continuous integration changes: Added experimental GitHub Actions CI builds (#2544), streamlined Travis CI builds, added a fourth R version (second-newest old release; currently R 3.5) to Travis test matrix (#2592).
 - Functions that update database entries no longer pass `created_at` or `updated_at` timestamps. The database now updates these itself and ensures they are consistently in UTC (#1083).
@@ -45,10 +56,12 @@ For more information about this file see also [Keep a Changelog](http://keepacha
 - PEcAn.JULES: Removed dependency on `ncdf4.helpers` package, which has been removed from CRAN (#2511).
 - data.remote: Arguments to the function `call_MODIS()` have been changed (issue #2519). 
 - Changed precipitaion downscale in `PEcAn.data.atmosphere::download.NOAA_GEFS_downscale`. Precipitation was being downscaled via a spline which was causing fake rain events. Instead the 6 hr precipitation flux values from GEFS are preserved with 0's filling in the hours between. 
--Changed `dbfile.input.insert` to work with inputs (i.e soils) that don't have start and end dates associated with them 
+- Changed `dbfile.input.insert` to work with inputs (i.e soils) that don't have start and end dates associated with them 
+- Default behavior for `stop_on_error` is now `TRUE` for non-ensemble runs; i.e., workflows that run only one model simulation (or omit the `ensemble` XML group altogether) will fail if the model run fails. For ensemble runs, the old behavior is preserved; i.e., workflows will continue even if one of the model runs failed. This behavior can also be manually controlled by setting the new `run -> stop_on_error` XML tag to `TRUE` or `FALSE`.
 
 ### Added
 
+- Now creates docker images during a PR, when merged it will push them to docker hub and github packages
 - New functionality to the PEcAn API to GET information about PFTs, formats & sites, submit workflows in XML or JSON formats & download relevant inputs/outputs/files related to runs & workflows (#2674 #2665 #2662 #2655)
 - Functions to send/receive messages to/from rabbitmq.
 - Documentation in [DEV-INTRO.md](DEV-INTRO.md) on development in a docker environment (#2553)
@@ -63,6 +76,7 @@ For more information about this file see also [Keep a Changelog](http://keepacha
 - Documentation how to run ED using singularity
 - PEcAn.DB gains new function `get_postgres_envvars`, which tries to look up connection parameters from Postgres environment variables (if they are set) and return them as a list ready to be passed to `db.open`. It should be especially useful when writing tests that need to run on systems with many different database configurations (#2541).
 - New shiny application to show database synchronization status (shiny/dbsync)
+- Ability to run with [MERRA-2 meteorology](https://gmao.gsfc.nasa.gov/reanalysis/MERRA-2/) (reanalysis product based on GEOS-5 model)
 
 ### Removed
 
