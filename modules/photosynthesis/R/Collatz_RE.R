@@ -37,10 +37,11 @@ model{
   
   ## r BETAs
   
-  #RLEAF.R  tau.Rleaf~dgamma(0.01,0.01)
-  #RLEAF.R  for(i in 1:nrep){                  
-  #RLEAF.R   Rleaf[i]~dnorm(0,tau.Rleaf)
-  #RLEAF.R   R[i] <- Rleaf[i] + r0*rd
+  #RLEAF.R tau.Rleaf~dgamma(0.01,0.01)
+  #RLEAF.R  for(i in 1:nrep){       
+  #RLEAF.R  log.rleaf[i] ~ dnorm(0, tau.Rleaf)#on the log scale, centered at 0
+  #RLEAF.R  Rleaf[i] <- exp(log.rleaf[i])#will be centered at 1 on normal scale
+  #RLEAF.R  R[i] <- Rleaf[i]*r0*rd
   #RLEAF.R  }
   
   for(i in 1:n){ 

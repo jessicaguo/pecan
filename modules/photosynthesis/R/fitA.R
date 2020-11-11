@@ -243,7 +243,7 @@ if (!is.null(Kformula)) {
 Rformula <- NULL
 # Designating random effects
 if ("leaf" %in% r.random) {
-  Rformula <- " + Rleaf[rep[i]]"
+  Rformula <- " * Rleaf[rep[i]]"
   my.model <- gsub(pattern = "#RLEAF.R", "", my.model) # adds random effect priors
   out.variables <- c(out.variables, "tau.Rleaf", "Rleaf", "R") # adds "tau.Rleaf" and "Rleaf" to monitored variables
 }
