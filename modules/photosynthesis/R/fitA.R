@@ -28,13 +28,14 @@ fitA <- function(flux.data, cov.data = NULL, model = NULL, pathway, licor) {
     model <- list(V.fixed = NULL, V.random = NULL, 
                   a.fixed = NULL, a.random = NULL, 
                   k.fixed = NULL, k.random = NULL, 
+                  r.random = NULL,
                   n.iter = 5000, match = "fname")
   }
   
   ## designate variables to monitor
   if(pathway == "C3"){
     out.variables <- c("r0", "vmax0", "alpha0", "Jmax0", "cp0", "tau", "pmean", "pA")} else if(pathway == "C4"){
-        out.variables <- c("r0", "vmax0", "alpha0", "k0", "tau", "pmean", "pA")
+        out.variables <- c("r0", "vmax0", "alpha0", "k0", "tau", "pmean", "pA", "tau.r0")
       }
 
   
@@ -45,6 +46,7 @@ fitA <- function(flux.data, cov.data = NULL, model = NULL, pathway, licor) {
   a.random <- model$a.random
   k.fixed <- model$k.fixed
   k.random <- model$k.random
+  r.random <- model$r.random
   
   if (is.null(model$match)) {
     model$match <- "fname"
@@ -119,7 +121,8 @@ fitA <- function(flux.data, cov.data = NULL, model = NULL, pathway, licor) {
   }
   
 ## Specify between the C3 FvCB_RE model and the C4 Collatz_RE model
-filename <- ifelse(pathway == "C3", "FvCB_RE.R", "Collatz_RE.R")
+filename <- ifelse(pathway == "C3", "~/pecan/modules/photosynthesis/R/FvCB_RE.R", 
+                   "~/pecan/modules/photosynthesis/R/Collatz_RE.R")
 my.model <- readChar(filename, file.info(filename)$size)
 
 ## prepare list of data/constants/indices needed as model inputs
@@ -136,7 +139,8 @@ mydat <- list(an = dat$Photo[sel],
               Ko = 22000,  ## Michaelis constant O2  (Pa)
               po = 21000, ## partial pressure of O2  (Pa)
               rep = curve.id, 
-              nrep = n.curves)
+              nrep = n.curves, 
+              rd = abs(mean(dat$Photo[round(dat$PARi[sel], 2) == 0])))
                   
 
 ## TPU Limitation
@@ -164,7 +168,7 @@ Vformula <- NULL
 if ("leaf" %in% V.random) {
   Vformula <- " + Vleaf[rep[i]]"
   my.model <- gsub(pattern = "#RLEAF.V", " ", my.model) # adds random effect priors
-  out.variables <- c(out.variables, "tau.Vleaf") # adds "tau.Vleaf" to monitored variables
+  out.variables <- c(out.variables, "tau.Vleaf", "Vleaf", "V") # adds "tau.Vleaf" and "Vleaf" to monitored variables
 }
 # Designating fixed effects based on covariate matrix XV
 if (!is.null(XV)) {
@@ -187,7 +191,7 @@ Aformula <- NULL
 if ("leaf" %in% a.random) {
   Aformula <- " + Aleaf[rep[i]]"
   my.model <- gsub(pattern = "#RLEAF.A", "", my.model) # adds random effect priors
-  out.variables <- c(out.variables, "tau.Aleaf") # adds "tau.Aleaf" to monitored variables
+  out.variables <- c(out.variables, "tau.Aleaf", "Aleaf", "A") # adds "tau.Aleaf" and "Aleaf" to monitored variables
 }
 # Designating fixed effects based on covariate matrix Xa
 if (!is.null(Xa)) {
@@ -210,7 +214,7 @@ Kformula <- NULL
 if ("leaf" %in% k.random) {
   Kformula <- " + Kleaf[rep[i]]"
   my.model <- gsub(pattern = "#RLEAF.K", "", my.model) # adds random effect priors
-  out.variables <- c(out.variables, "tau.Kleaf") # adds "tau.Kleaf" to monitored variables
+  out.variables <- c(out.variables, "tau.Kleaf", "Kleaf", "K") # adds "tau.Kleaf" and "Kleaf" to monitored variables
 }
 # Designating fixed effects based on covariate matrix Xk
 if (!is.null(Xk)) {
@@ -225,6 +229,19 @@ if (!is.null(Xk)) {
 # Updates model formula to account for random and/or fixed effects
 if (!is.null(Kformula)) {
   my.model <- sub(pattern = "#KFORMULA", Kformula, my.model)
+}
+
+## r Formulas
+Rformula <- NULL
+# Designating random effects
+if ("leaf" %in% r.random) {
+  Rformula <- " + Rleaf[rep[i]]"
+  my.model <- gsub(pattern = "#RLEAF.R", "", my.model) # adds random effect priors
+  out.variables <- c(out.variables, "tau.Rleaf", "Rleaf", "R") # adds "tau.Rleaf" and "Rleaf" to monitored variables
+}
+# Updates model formula to account for random and/or fixed effects
+if (!is.null(Rformula)) {
+  my.model <- sub(pattern = "#RFORMULA", Rformula, my.model)
 }
 
 ## Define initial conditions
