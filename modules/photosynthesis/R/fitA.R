@@ -35,7 +35,8 @@ fitA <- function(flux.data, cov.data = NULL, model = NULL, pathway, licor) {
   ## designate variables to monitor
   if(pathway == "C3"){
     out.variables <- c("r0", "vmax0", "alpha0", "Jmax0", "cp0", "tau", "pmean", "pA")} else if(pathway == "C4"){
-        out.variables <- c("r0", "vmax0", "alpha0", "k0", "tau", "pmean", "pA", "tau.r0")
+        out.variables <- c("r0", "vmax0", "alpha0", "k0", "tau", "pmean", "pA")
+                           #, "tau.r0")
       }
 
   
@@ -259,9 +260,9 @@ if(pathway == "C3"){
   init[[3]] <- list(r0 = 2, vmax0 = 60, alpha0 = 0.28, tau = 20, cp0 = 5, Jmax0 = 60)  ##tau.Vleaf=100,beta1=1,beta2=2,beta5=2,tau.Vmon=3,tpu=20,
 } else if(pathway == "C4"){
   init<-list()
-  init[[1]]<-list(r0 = 0.8, vmax0 = 30, alpha0 = 0.03, tau = 10, k0 = 0.7*100000)   ## ,tau.Vleaf=300,tau.Kleaf=1e-10, beta1=4, beta2=1,beta5=3,tau.Vmon=10
-  init[[2]]<-list(r0 = 1, vmax0 = 20, alpha0 = 0.07, tau = 20, k0 = 0.8*100000)    ## ,tau.Vleaf=200,tau.Kleaf=2e-9,beta1=1,beta2=1,beta5=-1,tau.Vmon=20
-  init[[3]]<-list(r0 = 2, vmax0 = 15, alpha0 = 0.06, tau = 20, k0 = 0.2*1000000)    ## ,tau.Vleaf=100,tau.Kleaf=3e-8,beta1=1,beta2=2,beta5=2,tau.Vmon=3}
+  init[[1]]<-list(r0 = 0.5, vmax0 = 30, alpha0 = 0.03, tau = 10, k0 = 0.7*100000)   ## ,tau.Vleaf=300,tau.Kleaf=1e-10, beta1=4, beta2=1,beta5=3,tau.Vmon=10
+  init[[2]]<-list(r0 = 0.75, vmax0 = 20, alpha0 = 0.07, tau = 20, k0 = 0.8*100000)    ## ,tau.Vleaf=200,tau.Kleaf=2e-9,beta1=1,beta2=1,beta5=-1,tau.Vmon=20
+  init[[3]]<-list(r0 = 0.8, vmax0 = 15, alpha0 = 0.06, tau = 20, k0 = 0.2*1000000)    ## ,tau.Vleaf=100,tau.Kleaf=3e-8,beta1=1,beta2=2,beta5=2,tau.Vmon=3}
 }
  
 mc3 <- jags.model(file = textConnection(my.model), data = mydat, inits = init, n.chains = 3)

@@ -7,8 +7,9 @@ model{
  # r0 ~ dlnorm(-0.2,2.8)              ## leaf respiration
   k0 ~ dlnorm(11.5, 2.8)             ## initial slope of photosynthetic CO2 response
   tau ~ dgamma(0.1,0.1)
-  r0 ~ dnorm(rd, tau.r0)
-  tau.r0 ~ dgamma(0.1, 0.1)
+  r0 ~ dbeta(2,2)
+  # r0 ~ dnorm(rd, tau.r0)
+  # tau.r0 ~ dgamma(0.1, 0.1)
   
   ## alpha BETAs
   
@@ -39,7 +40,7 @@ model{
   #RLEAF.R  tau.Rleaf~dgamma(0.01,0.01)
   #RLEAF.R  for(i in 1:nrep){                  
   #RLEAF.R   Rleaf[i]~dnorm(0,tau.Rleaf)
-  #RLEAF.R   R[i] <- Rleaf[i] + r0
+  #RLEAF.R   R[i] <- Rleaf[i] + r0*rd
   #RLEAF.R  }
   
   for(i in 1:n){ 
@@ -58,7 +59,7 @@ model{
     ae[i] <- vmax[i]    
     
     ## Dark respiration
-    r[i] <- r0 #RFORMULA
+    r[i] <- r0*rd #RFORMULA
     
     pmean[i]<-min(min(al[i],ac[i]),ae[i])-r[i]      ## predicted net photosynthesis
     an[i] ~ dnorm(pmean[i],tau)                  ## likelihood
